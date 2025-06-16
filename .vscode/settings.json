@@ -1,0 +1,49 @@
+{
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit"
+        }
+    },
+    "python.analysis.typeCheckingMode": "basic",
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.analysis.autoImportCompletions": true,
+    "git.enableSmartCommit": true,
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "Use the Conventional Commits format for all commit messages."
+    },
+    {
+      "text": "The commit subject must follow this pattern: <type>(<scope>): <description>."
+    },
+    {
+      "text": "Replace <type> with one of the following: feat, fix, chore, docs, style, refactor, perf, test, build, ci, revert."
+    },
+    {
+      "text": "The <scope> should be the affected module, feature, or component (e.g., 'auth', 'api', 'ui')."
+    },
+    {
+      "text": "The <description> should be a concise summary of the change, written in imperative mood."
+    },
+    {
+      "text": "If a commit introduces breaking changes, append 'BREAKING CHANGE:' followed by a detailed explanation in the body."
+    },
+    {
+      "text": "If referencing an issue, add 'Closes #123' or 'Fixes #456' in the commit body."
+    },
+    {
+      "text": "Limit the subject line to 72 characters."
+    },
+    {
+      "text": "Separate the subject from the body with a blank line."
+    },
+    {
+      "text": "The commit body should explain what changed and why, wrapped at 72 characters per line."
+    },
+    {
+      "text": "Include Gitmojis where relevant, placed before the <type> in the subject line. Example: '✨ feat(auth): add login via Google'."
+    }
+  ]
+}
