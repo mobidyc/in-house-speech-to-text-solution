@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: upload_api
+  name: upload_api
+  
+  apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: upload_api
+    app.kubernetes.io/part-of: upload_api
+  name: upload_api
+spec:
+  ports:
+  - name: "8080"
+    port: 8080
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/name: upload_api

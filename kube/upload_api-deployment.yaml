@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: upload_api
+  name: upload_api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: upload_api
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: upload_api
+    spec:
+      initContainers:
+        - name: wait-for-redis
+          image: busybox
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -z doctolib_redis-master.default.svc.cluster.local 6379; do echo waiting for redis; sleep 2; done;",
+            ]
+      containers:
+        - name: upload_api
+          image: mobidyc/docto_upload:latest
+          envFrom:
+            - secretRef:
+                name: env-secret
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - curl -s 127.0.0.1:8080 && echo "Service ready" || exit 1
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 10
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              memory: 5Gi
+      restartPolicy: Always
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: accelerator
+                    operator: NotIn
+                    values:
+                      - nvidia
