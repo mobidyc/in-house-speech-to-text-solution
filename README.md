@@ -2,7 +2,7 @@
 
 ## Technical choices
 
-* Whisper (openai-whisper) transcript created as it was specically requested
+* Whisper (openai-whisper) transcript created as it was specifically requested
 * Whisperx transcript also created insted of whisper to include diarization and better timestamping
 * Whisperx has a GPU and CPU support implemented
 * Python Boto3 to use an S3 compatible solution (aws s3, Google Storage, Minio)
@@ -14,6 +14,11 @@ Additional choices
 * Ruff as a python Linter
 
 ## Main challenges to be addressed
+
+### Time spent on this project (1 day)
+
+* Lot of time was spent finding the *libcudnn_ops_infer.so.8* library for Fedora.
+* Diarization was not working out of the box, mismatch between pandas dataframe and dictionnary format.
 
 ### What would architecture design be ?
 
@@ -43,7 +48,7 @@ Adding more stateless Whisper services permits to transcript more and more audio
 
 ### How to containerize your code (docker) and how to serve it scalably ?
 
-To containeriez the code:
+To containerize the code:
 
 ```shell
 docker compose build --push
@@ -101,9 +106,9 @@ Using Prometheus, we can expose the time to render and other metrics
 
 * Managing multiple audio languages in the same audio sample can lead to transcription errors.
 * This product will work asynchronously only, it is not expected to be used with a stream.
-* This transcript could be translated to a defined language if needed.
-* We need a better naming and sharding to store files
-* Add non root user to containers
-* Manage local temp dir
-* Change process_file image to use lighter images like alpine (no need to cuda)
-* Clear redis queue if needed
+* Add non root user to containers.
+* Manage local temp dir.
+* Change *process_file* image to use smaller images like alpine (no need to cuda).
+* A page to List and Clear redis queue.
+* Github workflow is not working (Python crash, probably a memory issue), need to investigate.
+* Prometheus metrics should be added to the file processing
