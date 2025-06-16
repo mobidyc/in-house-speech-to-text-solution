@@ -104,6 +104,6 @@ Using Prometheus, we can expose the time to render and other metrics
 * This transcript could be translated to a defined language if needed.
 * We need a better naming and sharding to store files
 * Add non root user to containers
-* manage local temp dir
+* Manage local temp dir
 * Change process_file image to use lighter images like alpine (no need to cuda)
-* clear redis queue if needed
+* Clear redis queue if needed
