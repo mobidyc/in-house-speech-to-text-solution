@@ -29,6 +29,11 @@ jobs:
       run: |
         git config --global --add safe.directory $GITHUB_WORKSPACE
 
+    - name: Monitor memory before test
+      run: |
+        free -h
+        df -h
+
     - name: Run unit tests
       run: |
         uv run pytest tests    
