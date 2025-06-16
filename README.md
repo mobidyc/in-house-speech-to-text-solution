@@ -3,7 +3,7 @@
 ## Technical choices
 
 * Whisper (openai-whisper) transcript created as it was specifically requested
-* Whisperx transcript also created insted of whisper to include diarization and better timestamping
+* Whisperx transcript has also been created instead of whisper to include diarization and better timestamping
 * Whisperx has a GPU and CPU support implemented
 * Python Boto3 to use an S3 compatible solution (aws s3, Google Storage, Minio)
 
@@ -27,7 +27,7 @@ Additional choices
 * A storage solution (Minio) to host audio samples and text outputs.
 * One queuing system (Redis) to manage the FIFO operations.
 * One API service to ease storing/managing audio samples and manage the FIFO queuing system.
-* A stateless and scalable Whisper service, which will poll regularly in the queue if an audio sample is available to transcript it.
+* A stateless and scalable Whisper service, which will poll regularly the queue for an audio sample available for transcript.
 
 #### Infrastructure
 
