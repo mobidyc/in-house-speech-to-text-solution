@@ -1,0 +1,102 @@
+# Copyright Broadcom, Inc. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+# global:
+  # defaultStorageClass: "csi-cinder-high-speed" # OVH
+  # defaultStorageClass: "hyperdisk-balanced" # GKE custom sc
+
+fullnameOverride: "doctolib_redis"
+
+## @param architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
+##
+architecture: replication
+auth:
+  enabled: false
+master:
+  configuration: |
+    # Disbale AOF persistence
+    appendonly no
+    save 900 1
+    save 300 10
+    save 60 10000
+  resourcesPreset: "medium"
+  ## Persistence parameters
+  ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+  ##
+  persistence:
+    enabled: true
+    size: 8Gi
+    # storageClass: csi-cinder-high-speed # OVH
+    # storageClass: hyperdisk-balanced # GKE custom sc
+  persistentVolumeClaimRetentionPolicy:
+    enabled: false
+    whenScaled: Retain
+    whenDeleted: Retain
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: "nvidia.com/gpu.present"
+                operator: DoesNotExist
+
+replica:
+  configuration: |
+    appendonly no
+    save 900 1
+    save 300 10
+    save 60 10000
+  resourcesPreset: "medium"
+  replicaCount: 2
+  disableCommands:
+    - FLUSHDB
+    - FLUSHALL
+  persistence:
+    enabled: true
+    # storageClass: csi-cinder-high-speed # OVH
+    # storageClass: hyperdisk-balanced # GKE custom sc
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: "nvidia.com/gpu.present"
+                operator: DoesNotExist
+
+sentinel:
+  enabled: false
+
+## @section Metrics Parameters
+##
+metrics:
+  enabled: true
+  containerPorts:
+    http: 9121
+  service:
+    enabled: true
+    ports:
+      http: 9121
+  serviceMonitor:
+    port: http-metrics
+    enabled: true
+    interval: 30s
+  podMonitor:
+    port: metrics
+    enabled: true
+    interval: 30s
+  prometheusRule:
+    enabled: true
+
+## init-sysctl container parameters
+## used to perform sysctl operation to modify Kernel settings (needed sometimes to avoid warnings)
+##
+sysctl:
+  enabled: false
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 12-debian-12-r30
+  mountHostSys: false
+  resourcesPreset: "nano"

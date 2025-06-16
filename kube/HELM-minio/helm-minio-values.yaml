@@ -1,0 +1,96 @@
+# Copyright Broadcom, Inc. All Rights Reserved.
+# SPDX-License-Identifier: APACHE-2.0
+
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.defaultStorageClass Global default StorageClass for Persistent Volume(s)
+## @param global.storageClass DEPRECATED: use global.defaultStorageClass instead
+##
+# global:
+  # defaultStorageClass: "csi-cinder-high-speed" # OVH
+  # defaultStorageClass: "hyperdisk-balanced" # GKE custom sc
+
+fullnameOverride: "doctolibminio"
+## @param mode MinIO&reg; server mode (`standalone` or `distributed`)
+## ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
+##
+mode: standalone
+## MinIO&reg; authentication parameters
+##
+auth:
+  existingSecret: "minio-secret"
+  ## @param auth.rootUserSecretKey Key where the MINIO_ROOT_USER username is being stored inside the existing secret `auth.existingSecret`
+  ##
+  rootUserSecretKey: "MINIO_ROOT_USER"
+  ## @param auth.rootPasswordSecretKey Key where the MINIO_ROOT_USER password is being stored inside the existing secret `auth.existingSecret`
+  ##
+  rootPasswordSecretKey: "MINIO_ROOT_PASSWORD"
+provisioning:
+  enabled: true
+  resourcesPreset: "micro"
+  resources:
+    limits:
+      cpu: "100m"
+      memory: "128Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+
+defaultBuckets: "audio"
+## @param disableWebUI Disable MinIO&reg; Web UI
+## ref: https://github.com/minio/minio/tree/master/docs/config/#browser
+##
+disableWebUI: false
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable MinIO&reg; data persistence using PVC. If false, use emptyDir
+  ##
+  enabled: true
+  ## @param persistence.storageClass PVC Storage Class for MinIO&reg; data volume
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.mountPath Data volume mount path
+  ##
+  mountPath: /bitnami/minio/data
+  ## @param persistence.accessModes PVC Access Modes for MinIO&reg; data volume
+  ##
+  accessModes:
+  - ReadWriteOnce
+  ## @param persistence.size PVC Storage Request for MinIO&reg; data volume
+  ##
+  size: 50Gi
+
+resourcesPreset: "medium"
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    paths:
+    - /minio/v2/metrics/cluster
+    - /minio/v2/metrics/node
+    interval: 30s
+  prometheusRule:
+    enabled: true
+
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 1
+      preference:
+        matchExpressions:
+        - key: "nvidia.com/gpu.present"
+          operator: DoesNotExist
