@@ -1,0 +1,38 @@
+FROM nvidia/cuda:12.4.1-base-ubuntu22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN --mount=type=cache,target=/var/cache/apt apt update \
+       && apt-get install -y --no-install-recommends software-properties-common \
+       && add-apt-repository ppa:deadsnakes/ppa -y \
+       && apt update
+
+RUN --mount=type=cache,target=/var/cache/apt apt-get install -y --no-install-recommends \
+    python3.11 \
+    python3.11-dev \
+    python3-pip \
+    python3-tk \
+    curl \
+    wget \
+    vim \
+    vim-editorconfig \
+    libsndfile-dev \
+    ffmpeg \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+
+# Install uv.
+COPY --from=ghcr.io/astral-sh/uv:0.6.16 /uv /bin/uv
+
+RUN mkdir -p /app
+WORKDIR /
+
+ADD uv.lock /uv.lock
+ADD pyproject.toml /pyproject.toml
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+uv sync --locked
+
+ADD app /app
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["uv", "run", "-m", "uvicorn", "--host", "0", "--port", "8080", "app.upload_file:app", "--workers", "4", "--log-level", "info"]
