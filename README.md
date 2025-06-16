@@ -69,7 +69,7 @@ Using Kubernetes:
 
 ### How to build a scalable infrastructure with terraform ? What is the deployment process ?
 
-While I already Created and deployed K8s clusters using Terraform, I do need more practicing to be very efficient.
+While I already created clusters using Terraform, I do need more practicing to be very efficient.
 
 To answer the question, I would say that we need to focus on modularity for the deployment files, and variables to change the number of instances.
 
@@ -88,6 +88,31 @@ resource "aws_autoscaling_group" "app" {
     value               = var.environment
     propagate_at_launch = true
   }
+}
+```
+
+PS: do not forget to add a label for the GPU nodes, so K8S can use affinity on it
+
+```txt
+resource "aws_eks_node_group" "gpu_nodes" {
+  cluster_name    = aws_eks_cluster.my_cluster.name
+  node_group_name = "gpu-node-group"
+  node_role_arn   = aws_iam_role.eks_node_role.arn
+  subnet_ids      = module.vpc.private_subnets
+  instance_types  = ["g4dn.xlarge"]
+
+  labels = {
+    accelerator = "nvidia"
+  }
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 2
+    min_size     = 1
+  }
+
+  ami_type       = "AL2_x86_64_GPU" # Important pour drivers NVIDIA
+  capacity_type  = "ON_DEMAND"
 }
 ```
 
