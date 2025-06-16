@@ -1,0 +1,74 @@
+services:
+  minio:
+    image: bitnami/minio:2024.8.29
+    container_name: doctolibminio
+    environment:
+      - MINIO_ROOT_USER=minio-root-user
+      - MINIO_ROOT_PASSWORD=minio-root-password
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - 'minio_data:/bitnami/minio/data'
+    networks: &customnetwork
+      - doctolib_network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "mc ready local"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      redis:
+        condition: service_healthy
+  redis:
+    image: redis:latest
+    container_name: doctolib_redis
+    restart: always
+    ports:
+      - 6379:6379
+    networks: *customnetwork
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli --raw incr ping" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  process_queue:
+    image: mobidyc/doctoprocess:latest
+    build:
+      dockerfile: DockerFile.process_svc
+    env_file:
+      - .env
+    networks: *customnetwork
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+  upload_api:
+    image: mobidyc/docto_upload:latest
+    container_name: doctolib_upload_api
+    ports:
+      - '8080:8080'
+    build:
+      context: .
+      dockerfile: Dockerfile.upload_api
+    env_file:
+      - .env
+    networks: *customnetwork
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+volumes:
+  redisdata:
+  minio_data:
+    driver: local
+
+networks:
+  doctolib_network:
+    external: true
