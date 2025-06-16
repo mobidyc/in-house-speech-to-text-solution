@@ -1,0 +1,34 @@
+name: Docto Unitest
+
+on:
+  push:
+    branches:
+     - "**"
+  pull_request:
+    branches:
+     - "**"
+
+jobs:
+  Unitest:
+    runs-on: [self-hosted, doctotest]
+    environment: tests
+    env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: false
+        clean: true
+        submodules: true
+        ref: ${{ github.head_ref }} # Checkout the PR branch directly
+
+    - name: Configure Git to trust the repository path
+      run: |
+        git config --global --add safe.directory $GITHUB_WORKSPACE
+
+    - name: Run unit tests
+      run: |
+        uv run pytest tests    
